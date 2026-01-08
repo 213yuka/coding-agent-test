@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app import models, schemas
 from app.database import engine, get_db
+from app.unsafety import router as unsafe_router
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -12,6 +13,9 @@ app = FastAPI(
     description="A simple ToDo REST API built with FastAPI and SQLAlchemy",
     version="1.0.0"
 )
+
+# Include unsafe endpoints for GitHub Advanced Security testing
+app.include_router(unsafe_router, prefix="/api/v1", tags=["unsafe"])
 
 
 @app.post("/tasks", response_model=schemas.TaskResponse, status_code=status.HTTP_201_CREATED)
