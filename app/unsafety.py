@@ -4,6 +4,7 @@ import os
 from fastapi import APIRouter, Query
 from sqlalchemy import text
 from app.database import engine
+import ast
 
 router = APIRouter()
 
@@ -37,7 +38,10 @@ def read_file_unsafe(filename: str = Query("data.txt")):
     return {"content": content}
 
 @router.get("/unsafe/exec")
-def unsafe_exec(code: str = Query("print('hello')")):
-    # NG例: execでユーザー入力を実行（任意コード実行）
-    exec(code)
-    return {"executed": True}
+def unsafe_exec(code: str = Query("'hello'")):
+    # safer example: evaluate only Python literals instead of executing arbitrary code
+    try:
+        result = ast.literal_eval(code)
+    except (ValueError, SyntaxError):
+        return {"error": "Invalid expression"}
+    return {"result": result}
