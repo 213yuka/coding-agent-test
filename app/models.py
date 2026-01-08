@@ -1,11 +1,6 @@
 from sqlalchemy import Column, Integer, String, Enum, Date
 from app.database import Base
-import enum
-
-
-class TaskStatus(str, enum.Enum):
-    todo = "todo"
-    done = "done"
+from app.enums import TaskStatus
 
 
 class Task(Base):

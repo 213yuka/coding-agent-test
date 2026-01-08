@@ -1,12 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date
-from enum import Enum
-
-
-class TaskStatus(str, Enum):
-    todo = "todo"
-    done = "done"
+from app.enums import TaskStatus
 
 
 class TaskCreate(BaseModel):
