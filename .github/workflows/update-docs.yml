@@ -1,0 +1,45 @@
+name: Update Documentation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate project structure
+        run: |
+          echo "# Project Structure (Auto-generated)" > docs/STRUCTURE.md
+          echo "" >> docs/STRUCTURE.md
+          echo "\`\`\`" >> docs/STRUCTURE.md
+          tree -L 3 -I 'node_modules|.git' || find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -50
+          echo "\`\`\`" >> docs/STRUCTURE.md
+
+      - name: Update timestamp
+        run: |
+          echo "" >> docs/PROJECT_OVERVIEW.md
+          echo "---" >> docs/PROJECT_OVERVIEW.md
+          echo "Last updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> docs/PROJECT_OVERVIEW.md
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: Auto-update documentation [skip ci]" && git push)
