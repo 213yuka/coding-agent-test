@@ -1,7 +1,7 @@
 
 import subprocess
 import os
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from sqlalchemy import text
 from app.database import engine
 import ast
@@ -31,8 +31,12 @@ def unsafe_sql(task_id: str = Query("1")):
 
 @router.get("/unsafe/file")
 def read_file_unsafe(filename: str = Query("data.txt")):
-    # NG例: パストラバーサル（ユーザー入力でファイルパスを構築）
-    filepath = os.path.join("/var/data", filename)
+    # 安全な例: 正規化とベースディレクトリチェックでパストラバーサルを防止
+    base_path = "/var/data"
+    filepath = os.path.normpath(os.path.join(base_path, filename))
+    # ベースディレクトリ外へのアクセスを拒否
+    if os.path.commonpath([base_path, filepath]) != base_path:
+        raise HTTPException(status_code=400, detail="Invalid file path")
     with open(filepath, "r") as f:
         content = f.read()
     return {"content": content}
