@@ -16,8 +16,11 @@ def unsafe_command(cmd: str = Query("echo hello")):
 
 @router.get("/unsafe/eval")
 def run_eval(user_code: str = Query("1+1")):
-    # NG例: evalでユーザー入力を評価（任意コード実行）
-    result = eval(user_code)
+    # 安全な例: ユーザー入力は Python リテラルとしてのみ評価し、任意コード実行を防止
+    try:
+        result = ast.literal_eval(user_code)
+    except (ValueError, SyntaxError):
+        raise HTTPException(status_code=400, detail="Invalid expression")
     return {"result": result}
 
 @router.get("/unsafe/sql")
